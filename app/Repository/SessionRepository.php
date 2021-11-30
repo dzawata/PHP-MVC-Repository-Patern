@@ -26,8 +26,8 @@ class SessionRepository
 
     public function findById($id): Session
     {
-        $statement = $this->connection->prepare("SELECT id, user_id FROM sessions WHERE id = ? ");
-        $statement->execute([$id]);
+        $statement = $this->connection->prepare("SELECT id, user_id FROM sessions WHERE id = '$id' ");
+        $statement->execute();
 
         try{
             $session = new Session();
@@ -43,11 +43,11 @@ class SessionRepository
 
     public function deleteById($id): void
     {
-        $statement = $this->connection->prepare("DELETE FROM sessions WHERE id = ?");
-        $statement->execute("'".[$id]."'");
+        $statement = $this->connection->prepare("DELETE FROM sessions WHERE id = '$id' ");
+        $statement->execute();
     }
 
-    public function deleteAll()
+    public function deleteAll(): void
     {
         $this->connection->exec("DELETE FROM sessions");
     }

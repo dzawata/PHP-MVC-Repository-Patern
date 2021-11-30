@@ -2,9 +2,12 @@
 
 namespace Idharf\PhpMvc\Controller;
 
+use Exception;
 use Idharf\PhpMvc\App\View;
 use Idharf\PhpMvc\Config\Database;
 use Idharf\PhpMvc\Exception\ValidationException;
+use Idharf\PhpMvc\Model\UpdatePasswordRequest;
+use Idharf\PhpMvc\Model\UpdateProfileRequest;
 use Idharf\PhpMvc\Model\UserLoginRequest;
 use Idharf\PhpMvc\Model\UserRegisterRequest;
 use Idharf\PhpMvc\Repository\SessionRepository;
@@ -98,8 +101,62 @@ class UserController
         View::render('User/register', $params);
     }
 
-    public function profile()
+    public function updateProfile()
     {
-        echo 'profile';
+        $user = $this->sessionService->current();
+        View::render("User/profile", [
+            'id' => $user->id,
+            'name' => $user->name
+        ]);
+    }
+
+    public function postUpdateProfile()
+    {
+        $user = $this->sessionService->current();
+        $request = new UpdateProfileRequest();
+        $request->id = $user->id;
+        $request->name = $_POST['name'];
+
+        try{
+            $this->userService->updateProfile($request);
+            View::redirect('/');
+        }catch(ValidationException $exception){
+            View::render("User/profile", [
+                'title' => 'Update Profile',
+                'error' => 'Error bos : ' . $exception->getMessage(),
+                'id' => $user->id,
+                'name' => $_POST['name']
+            ]);
+        }
+    }
+
+    public function updatePassword()
+    {
+        $user = $this->sessionService->current();
+        View::render("User/ubah_password", [
+            'title' => 'Ubah Password',
+            'id' => $user->id
+        ]);
+    }
+
+    public function postUpdatePassword(){
+
+        $user = $this->sessionService->current();
+
+        $request = new UpdatePasswordRequest();
+        $request->id = $user->id;
+        $request->newPassword = $_POST['newPassword'];
+        $request->oldPassword = $_POST['oldPassword'];
+
+        try{
+            $this->userService->updatePassword($request);
+            View::redirect('/');
+        }catch(Exception $exception){
+            View::render("User/ubah_password", [
+                'title' => 'Ubah Password',
+                'error' => $exception->getMessage(),
+                'id' => $user->id
+            ]);
+        }
     }
 }
